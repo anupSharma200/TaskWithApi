@@ -10,8 +10,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const { width, height } = Dimensions.get('window');
 
 export default function VideoPlayerScreen({ route, navigation }: any) {
-  const { fileId, fileName } = route.params;
-  const streamUrl = getStreamUrl(fileId);
+  const { fileId, fileName, localUri } = route.params;
+  const streamUrl = localUri ? localUri : getStreamUrl(fileId);
 
   return (
     <SafeAreaView style={styles.safeArea}>

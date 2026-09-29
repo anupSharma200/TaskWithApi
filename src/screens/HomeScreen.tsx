@@ -66,8 +66,11 @@ export default function HomeScreen({ navigation }: any) {
           Alert.alert('Error', result.errorMessage || 'Could not pick video');
         } else if (result.assets && result.assets.length > 0) {
           const selectedVideo = result.assets[0];
-          Alert.alert('Video Selected', `You selected: ${selectedVideo.fileName}`);
-          // You can handle the video upload here!
+          // Navigate to video player using the local URI
+          navigation.navigate('VideoPlayer', { 
+            fileName: selectedVideo.fileName || 'Local Video',
+            localUri: selectedVideo.uri 
+          });
         }
       } catch (error) {
         console.error(error);

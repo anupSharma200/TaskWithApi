@@ -23,7 +23,7 @@ export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   MainTabs: undefined;
-  VideoPlayer: { fileId: string; fileName: string };
+  VideoPlayer: { fileId?: string; fileName: string; localUri?: string };
   ContactUs: undefined;
   UpdateProfile: undefined;
   TermsOfService: undefined;
