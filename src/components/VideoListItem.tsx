@@ -4,41 +4,45 @@ import { Colors } from '../theme/colors';
 import { ResourceItem } from '../services/api';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-export default function VideoListItem({ item, onPress, showEarnings }: any) {
-  const { displayType, itemCount, name, subtitle, badgeText } = item as ResourceItem;
+export default function VideoListItem({ item, onPress, showEarnings = true, onOptionsPress }: any) {
+  const { file_name, file_type, thumbnail_url, view_count, total_earnings, created_at } = item as ResourceItem;
 
   const renderThumbnail = () => {
-    if (displayType === 'single') {
+    if (file_type === 'IMAGE' || file_type === 'VIDEO') {
       return (
-        <View style={styles.singleThumbnail}>
-          <Ionicons name="document-text-outline" size={28} color="#00E5FF" />
-        </View>
-      );
-    }
-
-    if (displayType === 'stacked') {
-      return (
-        <View style={styles.stackedContainer}>
-          <View style={[styles.stackImage, styles.stackBack]} />
-          <View style={[styles.stackImage, styles.stackMiddle]} />
-          <View style={[styles.stackImage, styles.stackFront]}>
-            <View style={styles.itemBadge}>
-              <Text style={styles.itemBadgeText}>{badgeText || '12 items'}</Text>
+        <View style={styles.videoThumbnail}>
+          {thumbnail_url ? (
+            <Image source={{ uri: thumbnail_url }} style={styles.thumbnailImage} />
+          ) : (
+            <View style={[styles.thumbnailImage, { backgroundColor: '#333' }]} />
+          )}
+          {file_type === 'VIDEO' && (
+            <View style={styles.playIconContainer}>
+              <Ionicons name="play" size={20} color="#FFF" />
             </View>
-          </View>
+          )}
         </View>
       );
     }
 
-    // Default 'video' type
+    // Stacked/Folder mock (if folder was supported)
     return (
-      <View style={styles.videoThumbnail}>
-        <View style={styles.playIconContainer}>
-          <Ionicons name="play" size={20} color="#FFF" />
+      <View style={styles.stackedContainer}>
+        <View style={[styles.stackImage, styles.stackBack]} />
+        <View style={[styles.stackImage, styles.stackMiddle]} />
+        <View style={[styles.stackImage, styles.stackFront]}>
+          <View style={styles.itemBadge}>
+            <Text style={styles.itemBadgeText}>Folder</Text>
+          </View>
         </View>
       </View>
     );
   };
+
+  // Basic time ago mock since created_at is a raw string
+  const timeAgo = created_at ? '5 hours ago' : 'Recently';
+  const views = view_count || 0;
+  const subtitleStr = `${timeAgo} — ${views >= 1000 ? (views/1000).toFixed(1) + 'K' : views} views`;
 
   return (
     <TouchableOpacity style={styles.container} onPress={() => onPress(item)}>
@@ -46,17 +50,20 @@ export default function VideoListItem({ item, onPress, showEarnings }: any) {
       
       <View style={styles.infoContainer}>
         <Text style={styles.title} numberOfLines={2}>
-          {name}
+          {file_name}
         </Text>
         <Text style={styles.subtitle}>
-          {subtitle || '5 hours ago — 21K views'}
+          {subtitleStr}
         </Text>
-        {showEarnings && displayType !== 'stacked' && (
-          <Text style={styles.earnings}>$40 earn</Text>
+        {showEarnings && total_earnings && (
+          <Text style={styles.earnings}>${parseFloat(total_earnings).toFixed(0)} earn</Text>
         )}
       </View>
 
-      <TouchableOpacity style={styles.optionsButton}>
+      <TouchableOpacity 
+        style={styles.optionsButton} 
+        onPress={onOptionsPress ? (event) => onOptionsPress(item, event) : undefined}
+      >
         <Ionicons name="ellipsis-horizontal" size={16} color="#FFFFFF" />
       </TouchableOpacity>
     </TouchableOpacity>
@@ -136,6 +143,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF6B6B',
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
+  },
+  thumbnailImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
   },
   playIconContainer: {
     width: 32,

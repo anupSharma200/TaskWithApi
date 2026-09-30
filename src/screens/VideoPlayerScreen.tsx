@@ -10,8 +10,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const { width, height } = Dimensions.get('window');
 
 export default function VideoPlayerScreen({ route, navigation }: any) {
-  const { fileId, fileName, localUri } = route.params;
-  const streamUrl = localUri ? localUri : getStreamUrl(fileId);
+  const { fileId, fileName, localUri, fileUrl } = route.params;
+  const streamUrl = localUri ? localUri : (fileUrl ? fileUrl : getStreamUrl(fileId));
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   title: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'Poppins-SemiBold',
     flex: 1,
   },
   videoContainer: {

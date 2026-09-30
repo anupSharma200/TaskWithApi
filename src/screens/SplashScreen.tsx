@@ -19,15 +19,22 @@ export default function SplashScreen({ navigation }: any) {
 
     const checkToken = async () => {
       try {
-        const token = await AsyncStorage.getItem('@access_token');
+        let token = CONFIG.ACCESS_TOKEN;
+        console.log("🚀 ~ checkToken ~ token:", token)
+        if (!token) {
+          token = await AsyncStorage.getItem('@access_token') || '';
+        } else {
+          await AsyncStorage.setItem('@access_token', token);
+        }
+        
         if (token) {
           CONFIG.setAccessToken(token);
-          setTimeout(() => navigation.replace('MainTabs'), 2000);
+          setTimeout(() => navigation.replace('MainTabs'), 3000);
         } else {
-          setTimeout(() => navigation.replace('Login'), 2000);
+          setTimeout(() => navigation.replace('Login'), 3000);
         }
       } catch (error) {
-        setTimeout(() => navigation.replace('Login'), 2000);
+        setTimeout(() => navigation.replace('Login'), 3000);
       }
     };
 

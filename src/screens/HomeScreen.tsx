@@ -12,32 +12,31 @@ export default function HomeScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock data based on the UI design
-    const mockData: ResourceItem[] = [
-      { id: '1', name: 'getnewlink.com_myprev_f2bca', subtitle: '5 hours ago — 21K views', type: 'file', displayType: 'single' },
-      { id: '2', name: 'Instagram all viral\nvideos links', subtitle: 'View details', type: 'folder', displayType: 'stacked', badgeText: '12 links' },
-      { id: '3', name: 'Instagram all viral\nvideos links', subtitle: 'View details', type: 'folder', displayType: 'stacked', badgeText: '12 links' },
-      { id: '4', name: 'Instagram all viral\nvideos links', subtitle: 'View details', type: 'folder', displayType: 'stacked', badgeText: '12 links' },
-      { id: '5', name: 'Instagram all viral\nvideos links', subtitle: 'View details', type: 'folder', displayType: 'stacked', badgeText: '12 links' },
-      { id: '6', name: 'getnewlink.com_myprev_f2bca', subtitle: '5 hours ago — 21K views', type: 'file', displayType: 'video' },
-      { id: '7', name: 'getnewlink.com_myprev_f2bca', subtitle: '5 hours ago — 21K views', type: 'file', displayType: 'video' },
-      { id: '8', name: 'getnewlink.com_myprev_f2bca', subtitle: '5 hours ago — 21K views', type: 'file', displayType: 'video' },
-    ];
-    
-    setTimeout(() => {
-      setResources(mockData);
-      setLoading(false);
-    }, 1000);
+    const fetchResources = async () => {
+      try {
+        const data = await getStorageResources();
+        console.log("🚀 ~ fetchResources ~ data:", data)
+        console.log('API Data:', data);
+        setResources(data);
+      } catch (error) {
+        console.error('Failed to fetch resources', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResources();
   }, []);
 
   const handleVideoPress = async (item: ResourceItem) => {
-    if (item.type === 'file') {
-      navigation.navigate('VideoPlayer', { fileId: item.id, fileName: item.name });
-    } else if (item.type === 'folder') {
+    if (item.file_type === 'VIDEO') {
+      navigation.navigate('VideoPlayer', { fileId: item.file_id, fileName: item.file_name, fileUrl: item.file_url });
+    } else if (item.file_type === 'IMAGE') {
+      navigation.navigate('ImageScreen', { fileUrl: item.file_url, fileName: item.file_name });
+    } else if (item.file_type === 'folder') {
       try {
         if (Platform.OS === 'android') {
-          // Note: On Android 13+, READ_MEDIA_VIDEO is used. 
-          // For simplicity in older versions, we request READ_EXTERNAL_STORAGE.
+          
           const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
             {
@@ -49,12 +48,10 @@ export default function HomeScreen({ navigation }: any) {
             },
           );
           if (granted !== PermissionsAndroid.RESULTS.GRANTED && granted !== 'never_ask_again') {
-            // It might fail on Android 13+ due to old permission model, but picker still works often.
             console.log('Storage permission denied');
           }
         }
 
-        // Open video gallery
         const result = await launchImageLibrary({
           mediaType: 'video',
           videoQuality: 'high',
@@ -66,7 +63,6 @@ export default function HomeScreen({ navigation }: any) {
           Alert.alert('Error', result.errorMessage || 'Could not pick video');
         } else if (result.assets && result.assets.length > 0) {
           const selectedVideo = result.assets[0];
-          // Navigate to video player using the local URI
           navigation.navigate('VideoPlayer', { 
             fileName: selectedVideo.fileName || 'Local Video',
             localUri: selectedVideo.uri 
@@ -86,6 +82,8 @@ export default function HomeScreen({ navigation }: any) {
     </View>
   );
 
+  const userName = resources.length > 0 && resources[0].owner ? resources[0].owner.first_name : 'Michael';
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -93,7 +91,7 @@ export default function HomeScreen({ navigation }: any) {
         <View style={styles.header}>
           <View>
             <Text style={styles.greetingText}>Let's earn something today!</Text>
-            <Text style={styles.userName}>Hi, Michael 👋</Text>
+            <Text style={styles.userName}>Hi, {userName} 👋</Text>
           </View>
           <View style={styles.notificationIcon}>
             <Text style={styles.bell}>🔔</Text>
@@ -119,7 +117,7 @@ export default function HomeScreen({ navigation }: any) {
         ) : (
           <View style={styles.listContainer}>
             {resources.slice(0, 5).map((item, index) => (
-              <VideoListItem key={item.id || index.toString()} item={item} onPress={handleVideoPress} showEarnings={true} />
+              <VideoListItem key={item.file_id || index.toString()} item={item} onPress={handleVideoPress} showEarnings={true} />
             ))}
           </View>
         )}
@@ -132,7 +130,7 @@ export default function HomeScreen({ navigation }: any) {
         {!loading && resources.length > 5 && (
            <View style={styles.listContainer}>
              {resources.slice(5).map((item, index) => (
-               <VideoListItem key={item.id || index.toString()} item={item} onPress={handleVideoPress} showEarnings={false} />
+               <VideoListItem key={item.file_id || index.toString()} item={item} onPress={handleVideoPress} showEarnings={false} />
              ))}
            </View>
         )}

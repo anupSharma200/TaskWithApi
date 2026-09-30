@@ -1,11 +1,15 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Image } from 'react-native';
 
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Colors } from '../theme/colors';
+import {
+  createNativeStackNavigator,
+} from '@react-navigation/native-stack';
+import {
+  createBottomTabNavigator,
+} from '@react-navigation/bottom-tabs';
 
+import { Colors } from '../theme/colors';
 
 import SplashScreen from '../screens/SplashScreen';
 import LoginScreen from '../screens/LoginScreen';
@@ -13,17 +17,36 @@ import HomeScreen from '../screens/HomeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import VideoPlayerScreen from '../screens/VideoPlayerScreen';
+import ImageScreen from '../screens/ImageScreen';
 import ContactUsScreen from '../screens/ContactUsScreen';
 import UpdateProfileScreen from '../screens/UpdateProfileScreen';
 import TermsOfServiceScreen from '../screens/TermsOfServiceScreen';
 import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import UploadedScreen from '../screens/UploadedScreen';
+
+// Custom tab Images
+const Homeimage = require('../essets/Images/home.png');
+const Uploadimage = require('../essets/Images/Upload.png');
+const reelimage = require('../essets/Images/reel.png');
+const Settingsimage = require('../essets/Images/setting.png');
 
 export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   MainTabs: undefined;
-  VideoPlayer: { fileId?: string; fileName: string; localUri?: string };
+
+  VideoPlayer: {
+    fileId?: string;
+    fileName: string;
+    localUri?: string;
+    fileUrl?: string;
+  };
+
+  Imagescreen: {
+    fileUrl: string;
+    fileName: string;
+  };
+
   ContactUs: undefined;
   UpdateProfile: undefined;
   TermsOfService: undefined;
@@ -38,7 +61,9 @@ const MainTabs = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+
         tabBarShowLabel: true,
+
         tabBarStyle: {
           backgroundColor: '#050505',
           borderTopWidth: 0,
@@ -47,88 +72,135 @@ const MainTabs = () => {
           paddingBottom: 8,
           paddingTop: 8,
         },
+
         tabBarActiveTintColor: '#FFFFFF',
         tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.7)',
-        tabBarLabel: ({ focused, color }) => {
-          if (!focused) return null;
+
+        tabBarLabel: ({ focused }) => {
+          if (!focused) {
+            return null;
+          }
+
           return (
-            <Text style={{ color: '#FFFFFF', fontSize: 11, fontFamily: 'Poppins-Medium', marginTop: 4 }}>
+            <Text
+              style={{
+                color: '#FFFFFF',
+                fontSize: 11,
+                fontFamily: 'Poppins-Medium',
+                marginTop: 4,
+              }}
+            >
               {route.name}
             </Text>
           );
         },
-        tabBarIcon: ({ focused, color }) => {
-          let iconName = 'home';
+
+        tabBarIcon: ({ focused }) => {
+          let iconSource;
+
+          // Home icon
           if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Upload') {
-            iconName = focused ? 'cloud-upload' : 'cloud-upload-outline';
-          } else if (route.name === 'Dashboard') {
-            iconName = focused ? 'grid' : 'grid-outline';
-          } else if (route.name === 'Settings') {
-            iconName = focused ? 'settings' : 'settings-outline';
+            iconSource = Homeimage;
           }
-          
+
+          // Upload icon
+          else if (route.name === 'Upload') {
+            iconSource = Uploadimage;
+          }
+
+          // Dashboard / Reel icon
+          else if (route.name === 'Dashboard') {
+            iconSource = reelimage;
+          }
+
+          // Settings icon
+          else if (route.name === 'Settings') {
+            iconSource = Settingsimage;
+          }
+
           return (
-            <View style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               {/* Top edge glowing flare */}
               {focused && (
-                <View style={{
-                  position: 'absolute',
-                  top: -16, // Push it up to the top edge of the tab bar
-                  width: 100,
-                  height: 3,
-                  backgroundColor: '#00E5FF',
-                  borderRadius: 3,
-                  shadowColor: '#00E5FF',
-                  shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: 1,
-                  shadowRadius: 10,
-                  elevation: 5,
-                }} />
-              )}
-              
-              {/* Intense Background Glow */}
-              {focused && (
-                <View style={{
-                  position: 'absolute',
-                  width: 50,
-                  height: 50,
-                  backgroundColor: '#00E5FF',
-                  opacity: 0.2,
-                  borderRadius: 25,
-                }} />
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: -16,
+                    width: 100,
+                    height: 3,
+                    backgroundColor: '#00E5FF',
+                    borderRadius: 3,
+
+                    shadowColor: '#00E5FF',
+                    shadowOffset: {
+                      width: 0,
+                      height: 0,
+                    },
+                    shadowOpacity: 1,
+                    shadowRadius: 10,
+
+                    elevation: 5,
+                  }}
+                />
               )}
 
-              <View>
-                <Ionicons 
-                  name={iconName} 
-                  size={24} 
-                  color={color} 
+              {/* Background Glow */}
+              {focused && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    width: 50,
+                    height: 50,
+                    backgroundColor: '#00E5FF',
+                    opacity: 0.2,
+                    borderRadius: 25,
+                  }}
                 />
-                {/* Fake the door dash in the custom home icon */}
-                {focused && route.name === 'Home' && (
-                  <View style={{ 
-                    position: 'absolute', 
-                    bottom: 4, 
-                    left: 7, 
-                    width: 10, 
-                    height: 2.5, 
-                    backgroundColor: '#050505', 
-                    borderRadius: 2 
-                  }} />
-                )}
-              </View>
+              )}
+
+              {/* Custom Image Icon */}
+              {iconSource && (
+                <Image
+                  source={iconSource}
+                  style={{
+                    width: 24,
+                    height: 24,
+                    resizeMode: 'contain',
+                    opacity: focused ? 1 : 0.7,
+                  }}
+                />
+              )}
             </View>
           );
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      {/* Upload and Dashboard tabs are placeholders based on the design */}
-      <Tab.Screen name="Upload" component={ProfileScreen} />
-      <Tab.Screen name="Dashboard" component={ProfileScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+      />
+
+      <Tab.Screen
+        name="Upload"
+        component={UploadedScreen}
+      />
+
+      <Tab.Screen
+        name="Dashboard"
+        component={ProfileScreen}
+      />
+
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+      />
     </Tab.Navigator>
   );
 };
@@ -136,15 +208,70 @@ const MainTabs = () => {
 const AppNavigator = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Splash" component={SplashScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="MainTabs" component={MainTabs} />
-        <Stack.Screen name="VideoPlayer" component={VideoPlayerScreen} options={{ presentation: 'fullScreenModal' }} />
-        <Stack.Screen name="ContactUs" component={ContactUsScreen} />
-        <Stack.Screen name="UpdateProfile" component={UpdateProfileScreen} />
-        <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
-        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        {/* Splash */}
+        <Stack.Screen
+          name="Splash"
+          component={SplashScreen}
+        />
+
+        {/* Login */}
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+        />
+
+        {/* Main Bottom Tabs */}
+        <Stack.Screen
+          name="MainTabs"
+          component={MainTabs}
+        />
+
+        {/* Video Player */}
+        <Stack.Screen
+          name="VideoPlayer"
+          component={VideoPlayerScreen}
+          options={{
+            presentation: 'fullScreenModal',
+          }}
+        />
+
+        {/* Image Screen */}
+        <Stack.Screen
+          name="Imagescreen"
+          component={ImageScreen}
+          options={{
+            presentation: 'fullScreenModal',
+          }}
+        />
+
+        {/* Contact Us */}
+        <Stack.Screen
+          name="ContactUs"
+          component={ContactUsScreen}
+        />
+
+        {/* Update Profile */}
+        <Stack.Screen
+          name="UpdateProfile"
+          component={UpdateProfileScreen}
+        />
+
+        {/* Terms */}
+        <Stack.Screen
+          name="TermsOfService"
+          component={TermsOfServiceScreen}
+        />
+
+        {/* Privacy Policy */}
+        <Stack.Screen
+          name="PrivacyPolicy"
+          component={PrivacyPolicyScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
